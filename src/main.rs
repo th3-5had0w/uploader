@@ -27,7 +27,7 @@ async fn index() -> Result<Markup> {
                 body {
 
                     form class="challenge-upload-form" method="post" enctype="multipart/form-data" {
-                        input type="file" name="challenge-file" id="fileToUpload" accept=".tar.gz" {}
+                        input type="file" name="challenge-file" id="fileToUpload" {}
                         button id="upload-challenge" { "upload" }
                     }
 
