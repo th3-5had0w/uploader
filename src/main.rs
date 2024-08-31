@@ -46,7 +46,7 @@ async fn upload_handle(mut payload: Multipart) -> Result<HttpResponse, actix_web
         let data_part = field.content_disposition().unwrap();
         if let Some(fname) = data_part.get_filename() {
 
-            let path: String = std::env::var("SAVE_PATH").expect("SAVE_PATH not set");
+            let path: String = std::env::var("SAVE_PATH").unwrap();
 
             let filename = fname.to_owned();
 
@@ -69,6 +69,8 @@ async fn upload_handle(mut payload: Multipart) -> Result<HttpResponse, actix_web
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::var("SAVE_PATH").expect("SAVE_PATH env variable");
+
     HttpServer::new(move || {
         App::new()
         .service(actix_files::Files::new("/static", "./src/static"))
