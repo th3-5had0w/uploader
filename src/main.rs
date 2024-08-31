@@ -41,23 +41,28 @@ async fn index() -> Result<Markup> {
 }
 
 async fn upload_handle(mut payload: Multipart) -> Result<HttpResponse, actix_web::Error> {
+
     while let Some(mut field) = payload.try_next().await? {
         let data_part = field.content_disposition().unwrap();
-        if let Some(_) = data_part.get_filename() {
+        if let Some(fname) = data_part.get_filename() {
 
-            let filepath = format!("x.tar.gz");
+            let path: String = std::env::var("SAVE_PATH").expect("SAVE_PATH not set");
+
+            let filename = fname.to_owned();
+
+            let filepath = format!("{}/{}", path, filename);
 
             let mut f = File::create(&filepath).unwrap();
             while let Some(chunk) = field.next().await {
                 let data = chunk.unwrap();
                 f.write_all(&data).unwrap();
             }
-            let json_resp = JsonResponse {is_error: false, message: format!("{} ok", filepath)};
+            let json_resp = JsonResponse {is_error: false, message: format!("{} ok", filename)};
             let res = serde_json::to_string(&json_resp).unwrap();
             return Ok(HttpResponse::Ok().content_type(ContentType::json()).body(res))
         }
     }
-    let json_resp = JsonResponse {is_error: true, message: "no file uploaded".to_string()};
+    let json_resp = JsonResponse {is_error: true, message: "no file uploaded".to_owned()};
     let res = serde_json::to_string(&json_resp).unwrap();
     Ok(HttpResponse::BadRequest().content_type(ContentType::json()).body(res))
 }
